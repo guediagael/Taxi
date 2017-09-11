@@ -5,7 +5,6 @@
     android:id="@+id/drawer_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fitsSystemWindows="true"
     tools:openDrawer="start">
 
 
@@ -13,11 +12,21 @@
     <android.support.design.widget.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
+        android:background="#B4C4D1"
         android:layout_height="match_parent"
         android:layout_gravity="start"
         android:fitsSystemWindows="true"
+        app:itemTextColor="#FFFFFFFF"
         app:headerLayout="@layout/nav_header_map"
-        app:menu="@menu/activity_map_drawer" />
+        app:menu="@menu/activity_map_drawer" >
+        <TextView
+            android:id="@+id/text_sign_out"
+            android:text="@string/navigation_drawer_sign_out"
+            android:textColor="#FFFFFFFF"
+            android:layout_gravity="bottom"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        </android.support.design.widget.NavigationView>
 
     <include layout="@layout/content_map"/>
 

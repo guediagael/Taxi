@@ -2,4 +2,19 @@
 <resources>
     <string name="app_name">Такси</string>
     <string name="msg_location_permission">Нам нужно ваше место положения, чтобы вам показать ближащие такси</string>
+    <string name="navigation_drawer_home">На главную</string>
+    <string name="navigation_drawer_profile">Профиль</string>
+    <string name="navigation_drawer_contacts">Контакты</string>
+    <string name="navigation_drawer_history">История</string>
+    <string name="navigation_drawer_rates">Тарифы</string>
+    <string name="navigation_drawer_sign_out">Выйти</string>
+    <string name="prompt_where_to_drive_through">Куда поедем ?</string>
+    <string name="prompt_where_to_leave">Откуда поедем ?</string>
+    <string name="btn_order">ЗАКАЗАТЬ</string>
+    <string name="btn_go">ПОЕХАЛИ</string>
+    <string name="prompt_comment">Комментарий к поездке</string>
+    <string name="prompt_rate_choice">Эконом; от 99 руб</string>
+    <string name="prompt_time">Ближайшее</string>
+    <string name="prompt_cash">Наличные</string>
+    <string name="prompt_comment_hint">Оставьте комментарий</string>
 </resources>

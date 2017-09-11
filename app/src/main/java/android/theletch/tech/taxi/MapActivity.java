@@ -1,25 +1,39 @@
 package android.theletch.tech.taxi;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.transition.Fade;
+import android.support.transition.Scene;
+import android.support.transition.TransitionManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.theletch.tech.taxi.utils.LocationPermission;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.AppCompatActivity;
+import android.transition.Slide;
+import android.transition.Transition;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.common.api.ApiException;
@@ -37,8 +51,11 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -63,13 +80,24 @@ public class MapActivity extends AppCompatActivity
     private LocationSettingsRequest mLocationSettingRequest;
     private SettingsClient mClient ;
 
-
+    private LinearLayout llToFadeInOut;
+    private LinearLayout formFooter;
+    private ViewGroup llForm;
+    private ViewGroup root;
     private TextView tvComment;
+    private Button bGo;
+    private DrawerLayout drawer;
+    private ImageView ivQuote;
+
+    private String comment;
+
+    private Marker marker;
 
 //    private GoogleApiClient mGoogleApiClient;
 
     private static final String KEY_CAMERA_POSITION = "cameraPosition";
     private static final String KEY_LAST_KNOWN_LOCATION = "lastLocation";
+    private static final String KEY_COMMENT = "comment";
     private static final float DEFAULT_ZOOM = 15;
 
 
@@ -84,33 +112,27 @@ public class MapActivity extends AppCompatActivity
             mLat = mLastKnowLocation.getLatitude();
             mLng = mLastKnowLocation.getLongitude();
 
+            comment = savedInstanceState.getString(KEY_COMMENT);
+
         }
         setContentView(R.layout.activity_map);
+
+        root = (ViewGroup) findViewById(R.id.coordinator_main);
         tvComment = (TextView) findViewById(R.id.text_map_comment);
+        llToFadeInOut = (LinearLayout) findViewById(R.id.layout_map_hidden_form_part);
+        llForm = (ViewGroup) findViewById(R.id.linearLayout);
+        bGo = (Button) findViewById(R.id.button_map_order);
+        ivQuote = (ImageView) findViewById(R.id.image_map_quote);
+
+
+
+
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         mClient = LocationServices.getSettingsClient(this);
 
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
 
-//        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-//        setSupportActionBar(toolbar);
-
-//        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-
-//        TODO: ADD TOGGLE
-//        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-//                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-//        drawer.setDrawerListener(toggle);
-//        toggle.syncState();
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -133,6 +155,7 @@ public class MapActivity extends AppCompatActivity
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapView);
         mapFragment.getMapAsync(this);
+
     }
 
     @Override
@@ -140,6 +163,7 @@ public class MapActivity extends AppCompatActivity
         if (mMap != null){
             outState.putParcelable(KEY_CAMERA_POSITION,mCameraPosition);
             outState.putParcelable(KEY_LAST_KNOWN_LOCATION,mLastKnowLocation);
+            outState.putString(KEY_COMMENT,tvComment.getText().toString());
             super.onSaveInstanceState(outState);
         }
     }
@@ -168,7 +192,8 @@ public class MapActivity extends AppCompatActivity
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.map, menu);
+//        getMenuInflater().inflate(R.menu.map, menu);
+//        TODO: add up button
         return true;
     }
 
@@ -181,10 +206,7 @@ public class MapActivity extends AppCompatActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
-        }
+
 
         return super.onOptionsItemSelected(item);
     }
@@ -194,17 +216,15 @@ public class MapActivity extends AppCompatActivity
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-        if (id == R.id.nav_camera) {
+        if (id == R.id.nav_main) {
             // Handle the camera action
-        } else if (id == R.id.nav_gallery) {
+        } else if (id == R.id.nav_history) {
 
-        } else if (id == R.id.nav_slideshow) {
+        } else if (id == R.id.nav_contacts) {
 
-        } else if (id == R.id.nav_manage) {
+        } else if (id == R.id.nav_profile) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.nav_rates) {
 
         }
 
@@ -248,6 +268,10 @@ public class MapActivity extends AppCompatActivity
 
     private void focusOnMap(){
         LatLng userLocation = new LatLng(mLat,mLng);
+        if (marker!=null) marker.remove();
+        marker = mMap.addMarker(new MarkerOptions()
+        .position(userLocation)
+        .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( userLocation,DEFAULT_ZOOM));
 
     }
@@ -382,11 +406,66 @@ public class MapActivity extends AppCompatActivity
     }
 
 
-    private void showFullForm(){
+    public void showFullForm(View view){
+        bGo.animate()
+                .translationY(bGo.getHeight())
+                .alpha(0.0f)
+                .setDuration(200)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                        bGo.setVisibility(View.GONE);
+                        Slide slide = new Slide(Gravity.BOTTOM);
+                        slide.setDuration(200);
+                        TransitionManager.beginDelayedTransition(llForm);
+                        llToFadeInOut.setVisibility(View.VISIBLE);
+
+
+                    }
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        mMap.moveCamera(CameraUpdateFactory.scrollBy(0,llToFadeInOut.getHeight()));
+
+
+                    }
+                });
+
+
+
+
 
     }
 
-    private void showHalfForm(){
+    public void showHalfForm(View view){
+        bGo.setVisibility(View.VISIBLE);
+        bGo.setAlpha(0.0f);
+        bGo.animate()
+                .translationY(0)
+                .alpha(1.0f)
+                .setDuration(500)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        super.onAnimationEnd(animation);
+                    }
+
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        super.onAnimationStart(animation);
+                        Slide slide = new Slide(Gravity.BOTTOM);
+                        slide.setDuration(500);
+                        TransitionManager.beginDelayedTransition(llForm);
+                        llToFadeInOut.setVisibility(View.GONE);
+                        mMap.moveCamera(CameraUpdateFactory.scrollBy(0,-llToFadeInOut.getHeight()));
+
+
+
+                    }
+                });
+
 
     }
 
@@ -394,15 +473,34 @@ public class MapActivity extends AppCompatActivity
 //        DialogFragment dialogFragment = new CommentDialogFragment();
 //        dialogFragment.show(getSupportFragmentManager(),CommentDialogFragment.TAG);
         FragmentManager fragmentManager = getSupportFragmentManager();
-        CommentDialogFragment newFragment = new CommentDialogFragment();
+        CommentDialogFragment newFragment = CommentDialogFragment.newInstance(tvComment.getText()
+                .toString());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_OPEN);
-        transaction.add(android.R.id.content, newFragment).addToBackStack(null).commit();
+//        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
+        transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
+        transaction.add(android.R.id.content, newFragment,CommentDialogFragment.TAG)
+                .commit();
+    }
+
+    public void openDrawer(View view){
+        drawer.openDrawer(Gravity.LEFT,true);
+    }
+
+    public void closeDrawer(View view){
+        drawer.closeDrawer(Gravity.LEFT,true);
     }
 
     @Override
     public void sendComment(String comment) {
         tvComment.setText(comment);
-//        TODO : change the image close to the comment to be yellow
+        ivQuote.setImageResource(R.drawable.ic_quote_active);
+
     }
+
+    @Override
+    public void setCommentEmpty() {
+        ivQuote.setImageResource(R.drawable.ic_quote_inactive);
+    }
+
+
 }
