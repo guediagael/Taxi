@@ -91,7 +91,7 @@ public class MapActivity extends AppCompatActivity
 
     private String comment;
 
-    private Marker marker;
+//    private Marker marker;
 
 //    private GoogleApiClient mGoogleApiClient;
 
@@ -124,8 +124,7 @@ public class MapActivity extends AppCompatActivity
         bGo = (Button) findViewById(R.id.button_map_order);
         ivQuote = (ImageView) findViewById(R.id.image_map_quote);
 
-
-
+        if (comment!=null && comment.length()>1) tvComment.setText(comment);
 
 
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
@@ -135,6 +134,7 @@ public class MapActivity extends AppCompatActivity
 
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setItemIconTintList(null);
         navigationView.setNavigationItemSelectedListener(this);
 
 
@@ -217,7 +217,6 @@ public class MapActivity extends AppCompatActivity
         int id = item.getItemId();
 
         if (id == R.id.nav_main) {
-            // Handle the camera action
         } else if (id == R.id.nav_history) {
 
         } else if (id == R.id.nav_contacts) {
@@ -236,7 +235,12 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap =googleMap;
-//        mGoogleApiClient.connect();
+        mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                showHalfForm();
+            }
+        });
         getCoordinates();
     }
 
@@ -268,10 +272,10 @@ public class MapActivity extends AppCompatActivity
 
     private void focusOnMap(){
         LatLng userLocation = new LatLng(mLat,mLng);
-        if (marker!=null) marker.remove();
-        marker = mMap.addMarker(new MarkerOptions()
-        .position(userLocation)
-        .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
+//        if (marker!=null) marker.remove();
+//        marker = mMap.addMarker(new MarkerOptions()
+//        .position(userLocation)
+//        .icon(BitmapDescriptorFactory.fromResource(R.drawable.pin)));
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom( userLocation,DEFAULT_ZOOM));
 
     }
@@ -407,6 +411,7 @@ public class MapActivity extends AppCompatActivity
 
 
     public void showFullForm(View view){
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
         bGo.animate()
                 .translationY(bGo.getHeight())
                 .alpha(0.0f)
@@ -439,44 +444,47 @@ public class MapActivity extends AppCompatActivity
 
     }
 
-    public void showHalfForm(View view){
-        bGo.setVisibility(View.VISIBLE);
-        bGo.setAlpha(0.0f);
-        bGo.animate()
-                .translationY(0)
-                .alpha(1.0f)
-                .setDuration(500)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        super.onAnimationEnd(animation);
-                    }
+    public void showHalfForm(){
+        if (bGo.getVisibility() == View.GONE){
+            mMap.getUiSettings().setMyLocationButtonEnabled(true);
+            bGo.setVisibility(View.VISIBLE);
+            bGo.setAlpha(0.0f);
+            bGo.animate()
+                    .translationY(0)
+                    .alpha(1.0f)
+                    .setDuration(500)
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            super.onAnimationEnd(animation);
 
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        super.onAnimationStart(animation);
-                        Slide slide = new Slide(Gravity.BOTTOM);
-                        slide.setDuration(500);
-                        TransitionManager.beginDelayedTransition(llForm);
-                        llToFadeInOut.setVisibility(View.GONE);
-                        mMap.moveCamera(CameraUpdateFactory.scrollBy(0,-llToFadeInOut.getHeight()));
+                        }
+
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            super.onAnimationStart(animation);
+                            Slide slide = new Slide(Gravity.BOTTOM);
+                            slide.setDuration(500);
+                            TransitionManager.beginDelayedTransition(llForm);
+                            llToFadeInOut.setVisibility(View.GONE);
+                            mMap.moveCamera(CameraUpdateFactory.scrollBy(0,-llToFadeInOut.getHeight()));
 
 
 
-                    }
-                });
+                        }
+                    });
+
+        }
 
 
     }
 
     public void openCommentDialog(View view){
-//        DialogFragment dialogFragment = new CommentDialogFragment();
-//        dialogFragment.show(getSupportFragmentManager(),CommentDialogFragment.TAG);
+
         FragmentManager fragmentManager = getSupportFragmentManager();
         CommentDialogFragment newFragment = CommentDialogFragment.newInstance(tvComment.getText()
                 .toString());
         FragmentTransaction transaction = fragmentManager.beginTransaction();
-//        transaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE);
         transaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out);
         transaction.add(android.R.id.content, newFragment,CommentDialogFragment.TAG)
                 .commit();
@@ -500,6 +508,7 @@ public class MapActivity extends AppCompatActivity
     @Override
     public void setCommentEmpty() {
         ivQuote.setImageResource(R.drawable.ic_quote_inactive);
+        tvComment.clearComposingText();
     }
 
 

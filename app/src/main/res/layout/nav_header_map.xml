@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="@dimen/nav_header_height"
-    android:gravity="bottom"
+    android:gravity="top"
     android:orientation="vertical"
     android:paddingBottom="@dimen/activity_vertical_margin"
     android:paddingLeft="@dimen/activity_horizontal_margin"
@@ -15,7 +15,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="closeDrawer"
-        android:paddingTop="@dimen/nav_header_vertical_spacing"
         app:srcCompat="@drawable/ic_drawer_expanded_white_24dp" />
 
 

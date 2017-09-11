@@ -32,15 +32,31 @@
         android:layout_marginStart="16dp" />
 
 
+    <ImageView
+        android:id="@+id/image_pin"
+        android:src="@drawable/pin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/mapView"
+        android:layout_marginRight="8dp"
+        app:layout_constraintRight_toRightOf="@+id/mapView"
+        app:layout_constraintHorizontal_bias="0.501"
+        app:layout_constraintTop_toTopOf="@+id/mapView"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        app:layout_constraintBottom_toTopOf="@+id/linearLayout" />
+
+
 
 
         <LinearLayout
             android:background="#FFFFFF"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:elevation="@dimen/cardview_default_elevation"
+            android:elevation="8dp"
             android:orientation="vertical"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="21dp"
             android:layout_marginLeft="8dp"
             android:layout_marginRight="8dp"
             app:layout_constraintLeft_toLeftOf="@+id/mapView"
@@ -50,7 +66,8 @@
             android:id="@+id/linearLayout"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintBottom_toTopOf="@+id/button_map_order">
-            <include layout="@layout/form_footer_start"/>
+
+            <include layout="@layout/form_footer_start" />
             <!--&lt;!&ndash;TODO: change ruble to the font&ndash;&gt;-->
 
 
@@ -60,6 +77,11 @@
         android:id="@+id/button_map_order"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textColor="#FFFFFFFF"
+        android:background="@color/colorAccent"
+        android:paddingStart="48dp"
+        android:elevation="8dp"
+        android:paddingEnd="48dp"
         android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"

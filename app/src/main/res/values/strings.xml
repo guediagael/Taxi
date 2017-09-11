@@ -16,9 +16,9 @@
     <string name="prompt_where_to_drive_through">Destination</string>
     <string name="prompt_where_to_leave">Pick up</string>
     <string name="btn_order">Order</string>
-    <string name="btn_go">Let\\\'s go</string>
+    <string name="btn_go">Let\'s go</string>
     <string name="prompt_comment">Leave a comment for the driver</string>
-    <string name="prompt_rate_choice">Econom; from 99 rub</string>
+    <string name="prompt_rate_choice">Econom; from 99rub</string>
     <string name="prompt_time">Near</string>
     <string name="prompt_cash">Cash</string>
     <string name="prompt_comment_hint">Leave a comment</string>
